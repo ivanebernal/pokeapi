@@ -1,14 +1,21 @@
 package ldurazo.github.pokeapi;
 
 import android.app.Activity;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 
+import java.util.List;
+
+import ldurazo.github.pokeapi.Adapters.PokemonAdapter;
 import ldurazo.github.pokeapi.Models.Pokedex;
+import ldurazo.github.pokeapi.Models.PokemonUri;
 import ldurazo.github.pokeapi.Transport.PokeApiTransport;
 
 
@@ -20,7 +27,7 @@ import ldurazo.github.pokeapi.Transport.PokeApiTransport;
  * Use the {@link PokeListFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class PokeListFragment extends Fragment {
+public class PokeListFragment extends android.support.v4.app.Fragment {
     private final PokeApiTransport mPokeApiTransport = new PokeApiTransport();
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -42,11 +49,9 @@ public class PokeListFragment extends Fragment {
      * @return A new instance of fragment PokeListFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static PokeListFragment newInstance(String param1, String param2) {
+    public static PokeListFragment newInstance() {
         PokeListFragment fragment = new PokeListFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -69,6 +74,8 @@ public class PokeListFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_poke_list, container, false);
+        ListView listView = new ListView(view.getContext());
+        listView.setAdapter(new PokemonAdapter(view.getContext(), mPokeApiTransport.getPokemonUri()));
         return view;
     }
 
@@ -80,14 +87,15 @@ public class PokeListFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
         try {
-            mListener = (OnFragmentInteractionListener) activity;
+            mListener = (OnFragmentInteractionListener) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
+            throw new ClassCastException(context.toString()
                     + " must implement OnFragmentInteractionListener");
         }
+        final List<PokemonUri> pokedex = mPokeApiTransport.getPokemonUri();
     }
 
     @Override
