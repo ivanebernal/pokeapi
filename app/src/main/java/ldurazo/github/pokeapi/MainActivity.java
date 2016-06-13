@@ -1,18 +1,21 @@
 package ldurazo.github.pokeapi;
 
+import android.graphics.Bitmap;
 import android.net.Uri;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import java.util.Collections;
+
 import ldurazo.github.pokeapi.Models.Pokedex;
+import ldurazo.github.pokeapi.Models.Pokemon;
 import ldurazo.github.pokeapi.PokeApiService.PokeApiService;
 import ldurazo.github.pokeapi.Transport.PokeApiTransport;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements PokeListFragment.OnFragmentInteractionListener{
+public class MainActivity extends AppCompatActivity implements PokeListFragment.OnPokemonSelected, PokemonDetailsFragment.OnFragmentInteractionListener {
 
     private final PokeApiTransport mPokeApiTransport = new PokeApiTransport();
 
@@ -31,9 +34,10 @@ public class MainActivity extends AppCompatActivity implements PokeListFragment.
                 pokedex.setName(response.body().getName());
                 pokedex.setPokemonUri(response.body().getPokemonUri());
                 pokedex.setResourceUri(response.body().getResourceUri());
+                Collections.sort(pokedex.getPokemonUri());
                 getSupportFragmentManager()
                             .beginTransaction()
-                            .add(R.id.main_layout, PokeListFragment.newInstance(pokedex.getPokemonUri()), "pokemonList" )
+                            .replace(R.id.main_layout, PokeListFragment.newInstance(pokedex.getPokemonUri()), "pokemonList" )
                             .commit();
             }
 
@@ -42,6 +46,17 @@ public class MainActivity extends AppCompatActivity implements PokeListFragment.
                 t.getCause();
             }
         });
+
+    }
+
+    @Override
+    public void onPokemonSelected(Pokemon pokemon, String pokeSprite) {
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.main_layout, PokemonDetailsFragment.newInstance(pokemon, pokeSprite), "detailsFragment")
+                .addToBackStack(null)
+                .commit();
 
     }
 

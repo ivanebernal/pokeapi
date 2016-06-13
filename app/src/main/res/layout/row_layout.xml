@@ -6,11 +6,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="40sp"
+        android:textStyle="bold"
         android:id="@+id/pokemon_name"/>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="20sp"
+        android:textSize="10sp"
         android:id="@+id/pokemon_uri"/>
 
 </LinearLayout>

@@ -50,14 +50,12 @@ public class PokemonUri implements Comparable {
         PokemonUri anotherPokemon = (PokemonUri) another;
         Integer anotherPokemonNum = getPokemonNum(anotherPokemon);
         Integer pokemonNum = getPokemonNum(this);
-        return anotherPokemonNum.compareTo(pokemonNum);
+        return pokemonNum.compareTo(anotherPokemonNum);
     }
 
-    private int getPokemonNum(PokemonUri anotherPokemon) {
-        Pattern pokeNumRegex = Pattern.compile("[0-9]+");
-        Matcher match = pokeNumRegex.matcher(anotherPokemon.getResourceUri());
-        String pokemonNumString = match.group();
-        pokemonNumString = pokemonNumString.substring(1,pokemonNumString.length()-1);
-        return Integer.parseInt(pokemonNumString);
+    public int getPokemonNum(PokemonUri anotherPokemon) {
+        String[] pokeUri = anotherPokemon.getResourceUri().split("\\/");
+        String pokeNum = pokeUri[pokeUri.length-1];
+        return Integer.parseInt(pokeNum);
     }
 }
