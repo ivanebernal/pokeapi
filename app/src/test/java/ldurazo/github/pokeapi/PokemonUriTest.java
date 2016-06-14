@@ -22,9 +22,9 @@ public class PokemonUriTest {
         pokemon1.setName("Bulbasaur");
         pokemon2.setName("Charmander");
         pokemon3.setName("Squirtle");
-        pokemon1.setResourceUri("/1/");
-        pokemon2.setResourceUri("/2/");
-        pokemon3.setResourceUri("/3/");
+        pokemon1.setResourceUri("api/v1/pokemon/1/");
+        pokemon2.setResourceUri("api/v1/pokemon/2/");
+        pokemon3.setResourceUri("api/v1/pokemon/3/");
         List<PokemonUri> pokemonList = new ArrayList<>();
         pokemonList.add(pokemon2);
         pokemonList.add(pokemon3);

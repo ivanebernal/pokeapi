@@ -1,5 +1,7 @@
 package ldurazo.github.pokeapi.Transport;//Created by ldurazo on 6/11/16
 
+import android.graphics.Bitmap;
+
 import java.util.List;
 
 import ldurazo.github.pokeapi.Models.Pokedex;
@@ -46,5 +48,4 @@ public class PokeApiTransport {
     public List<PokemonUri> getPokemonUri(){
         return getPokedex().getPokemonUri();
     }
-
 }
