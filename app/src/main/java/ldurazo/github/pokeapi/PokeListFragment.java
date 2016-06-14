@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
@@ -66,7 +67,7 @@ public class PokeListFragment extends android.support.v4.app.Fragment {
         Activity activity = (Activity) view.getContext();
         RecyclerView listView = (RecyclerView) view.findViewById(R.id.list_view);
         listView.setAdapter(new PokemonAdapter(activity , mPokemonUris));
-        listView.setLayoutManager(new LinearLayoutManager(activity, OrientationHelper.VERTICAL, false));
+        listView.setLayoutManager(new GridLayoutManager(activity, 3));
         return view;
     }
 

@@ -1,9 +1,13 @@
 package ldurazo.github.pokeapi;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RawRes;
 import android.support.v4.app.Fragment;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -17,6 +21,8 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.List;
 
 import ldurazo.github.pokeapi.Adapters.AbilityAdapter;
@@ -45,6 +51,8 @@ public class PokemonDetailsFragment extends Fragment {
     private static List<Type> mPokemonTypes;
     private static List<Move> mPokemonMoves;
     private static String mPokemonSprite;
+    private static String mPokemonNumber;
+    private static MediaPlayer mCryPlayer;
 
     // TODO: Rename and change types of parameters
 
@@ -62,6 +70,9 @@ public class PokemonDetailsFragment extends Fragment {
         mPokemonTypes = pokemon.getTypes();
         mPokemonMoves = pokemon.getMoves();
         mPokemonSprite = pokeSprite;
+        mPokemonNumber = pokemon.getNationalId().toString();
+        if(mPokemonNumber.length() == 2) mPokemonNumber = "0" + mPokemonNumber;
+        if(mPokemonNumber.length() == 1) mPokemonNumber = "00" + mPokemonNumber;
         return fragment;
     }
 
@@ -70,12 +81,29 @@ public class PokemonDetailsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_pokemon_details, container, false);
+        final View view = inflater.inflate(R.layout.fragment_pokemon_details, container, false);
         TextView nameTextView = (TextView) view.findViewById(R.id.pokemon_name_detail);
         ListView abilitiesListView = (ListView) view.findViewById(R.id.abilities_list);
         ListView movementsListView = (ListView) view.findViewById(R.id.movements_list);
         LinearLayout typesListView = (LinearLayout) view.findViewById(R.id.types_view);
         ImageView pokeSpriteView = (ImageView) view.findViewById(R.id.sprite);
+        pokeSpriteView.setOnClickListener(new View.OnClickListener() {
+            @TargetApi(Build.VERSION_CODES.KITKAT)
+            @Override
+            public void onClick(View v) {
+                int cryResId = 0;
+                try {
+                    Field cryResField = R.raw.class.getDeclaredField("r"+ mPokemonNumber);
+                    cryResId = cryResField.getInt(cryResField);
+                } catch (NoSuchFieldException | IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+                if(cryResId != 0){
+                    mCryPlayer = MediaPlayer.create(view.getContext(), cryResId);
+                    mCryPlayer.start();
+                }
+            }
+        });
         for(Type type : mPokemonTypes){
             TextView typeTextView = new TextView(view.getContext());
             typeTextView.setText(type.getName());
@@ -84,8 +112,11 @@ public class PokemonDetailsFragment extends Fragment {
             typeTextView.setGravity(Gravity.CENTER);
             typesListView.addView(typeTextView);
         }
-
-        Picasso.with(view.getContext()).load("https://pokeapi.co/" + mPokemonSprite).resize(480,480).into(pokeSpriteView);
+        if(mPokemonSprite == null){
+            Picasso.with(view.getContext()).load(R.drawable.no_poke_symbol).resize(480,480).into(pokeSpriteView);
+        }else{
+            Picasso.with(view.getContext()).load("https://pokeapi.co/" + mPokemonSprite).resize(480,480).into(pokeSpriteView);
+        }
 
         nameTextView.setText(mPokemonName);
         Context context = view.getContext();

@@ -55,37 +55,71 @@ public class PokemonAdapter extends RecyclerView.Adapter<ViewHolder>{
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position) {
         final PokemonUri pokeUriElement = mPokemonList.get(position);
         final String pokeName = pokeUriElement.getName();
-        final String pokeUri = pokeUriElement.getResourceUri();
-        holder.setData(pokeName,pokeUri);
+
+        final Retrofit retrofit = mPokeApiTransport.getRetrofit();
+        final PokeApiService pokeApiService = retrofit.create(PokeApiService.class);
+        final int pokeNum = pokeUriElement.getPokemonNum(pokeUriElement);
+        final Call<Pokemon> pokeCall = pokeApiService.getPokemon(pokeNum);
+        pokeCall.enqueue(new Callback<Pokemon>() {
+            @Override
+            public void onResponse(Call<Pokemon> call, Response<Pokemon> response) {
+                final Pokemon pokemon = response.body();
+                List<SpriteUri> spriteUris = pokemon.getSpriteUris();
+                SpriteUri lastSpriteUri;
+                if(spriteUris.size() != 0){
+                    lastSpriteUri = spriteUris.get(spriteUris.size()-1);
+                    Call<Sprite> pokeCallSprite = pokeApiService.getSprite(lastSpriteUri.getResourceUri().substring(1));
+                    pokeCallSprite.enqueue(new Callback<Sprite>() {
+                        @Override
+                        public void onResponse(Call<Sprite> call, Response<Sprite> response) {
+                            String sprite = response.body().getImage();
+                            holder.setData(pokeName, sprite);
+                        }
+
+                        @Override
+                        public void onFailure(Call<Sprite> call, Throwable t) {
+                            t.getCause();
+                        }
+                    });
+                }
+            }
+            @Override
+            public void onFailure(Call<Pokemon> call, Throwable t) {
+                t.getCause();
+            }
+        });
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final Retrofit retrofit = mPokeApiTransport.getRetrofit();
-                final PokeApiService pokeApiService = retrofit.create(PokeApiService.class);
-                final int pokeNum = pokeUriElement.getPokemonNum(pokeUriElement);
                 final Call<Pokemon> pokeCall = pokeApiService.getPokemon(pokeNum);
                 pokeCall.enqueue(new Callback<Pokemon>() {
                     @Override
                     public void onResponse(Call<Pokemon> call, Response<Pokemon> response) {
                         final Pokemon pokemon = response.body();
                         List<SpriteUri> spriteUris = pokemon.getSpriteUris();
-                        SpriteUri lastSpriteUri = spriteUris.get(spriteUris.size()-1);
-                        Call<Sprite> pokeCallSprite = pokeApiService.getSprite(lastSpriteUri.getResourceUri().substring(1));
-                        pokeCallSprite.enqueue(new Callback<Sprite>() {
-                            @Override
-                            public void onResponse(Call<Sprite> call, Response<Sprite> response) {
-                                String sprite = response.body().getImage();
-                                mListener.onPokemonSelected(pokemon, sprite);
-                            }
+                        SpriteUri lastSpriteUri;
+                        if(spriteUris.size() != 0){
+                            lastSpriteUri = spriteUris.get(spriteUris.size()-1);
+                            Call<Sprite> pokeCallSprite = pokeApiService.getSprite(lastSpriteUri.getResourceUri().substring(1));
+                            pokeCallSprite.enqueue(new Callback<Sprite>() {
+                                @Override
+                                public void onResponse(Call<Sprite> call, Response<Sprite> response) {
+                                    String sprite = response.body().getImage();
+                                    mListener.onPokemonSelected(pokemon, sprite);
+                                }
 
-                            @Override
-                            public void onFailure(Call<Sprite> call, Throwable t) {
-                                t.getCause();
-                            }
-                        });
+                                @Override
+                                public void onFailure(Call<Sprite> call, Throwable t) {
+                                    t.getCause();
+                                }
+                            });
+                        }else{
+                            mListener.onPokemonSelected(pokemon, null);
+                        }
+
 
                     }
 
